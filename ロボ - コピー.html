@@ -458,6 +458,14 @@
           input.name = part;
           input.value = "0";
           input.min = "0";
+
+          // マウススクロールで増減
+          input.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            const step = event.deltaY < 0 ? 1 : -1;
+            input.value = Math.max(0, Number(input.value) + step);
+          });
+
           div.appendChild(label);
           div.appendChild(input);
           group.appendChild(div);
@@ -484,6 +492,10 @@
     function calculate() {
       const form = document.forms["robotForm"];
       const type = form.type.value;
+
+      // ロボット種類のlabelテキストを取得
+      const typeLabel = document.querySelector(`input[name="type"][value="${type}"]`).parentElement.textContent.trim();
+
       const maxLoad = maxLoadMap[type];
       const baseStats = { ...baseStatsMap[type] };
       const selectedAbility = form.ability.value;
@@ -500,7 +512,6 @@
             const partWeight = (specialAbilities[part]?.weight || 10) * count;
             totalWeight += partWeight;
             partsUsed.push(`${part} ×${count}（${partWeight}pt）`);
-
 
             if (specialAbilities[part]) {
               baseStats.hp += (specialAbilities[part].hp || 0) * count;
@@ -525,7 +536,7 @@
 
       document.getElementById("result").innerHTML = `
         ${warning}
-        <p><strong>選択フレーム:</strong> ${type}</p>
+        <p><strong>選択フレーム:</strong> ${typeLabel}</p>
         <p><strong>選択特技:</strong> ${selectedAbility}</p>
         <p><strong>機体ステータス:</strong> HP: ${baseStats.hp} / MP: ${baseStats.mp} / 回避力: ${baseStats.evasion} / 防護点: ${baseStats.defense}</p>
         <p><strong>使用パーツ:</strong></p>
